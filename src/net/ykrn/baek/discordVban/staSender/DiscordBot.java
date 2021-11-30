@@ -1,15 +1,16 @@
 package net.ykrn.baek.discordVban.staSender;
 
 import java.io.PrintStream;
+import java.nio.ByteBuffer;
 
 import javax.security.auth.login.LoginException;
 
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.audio.AudioSendHandler;
-import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import net.dv8tion.jda.core.managers.AudioManager;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.audio.AudioSendHandler;
+import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.managers.AudioManager;
 
 // DiscordBot.java
 // 버퍼의 PCM 데이터를 디스코드로 전송
@@ -34,7 +35,8 @@ public class DiscordBot {
 		// 봇 생성
 		try {
 			listener = new Listener(); // 리스너 생성
-			bot = new JDABuilder(token).addEventListener(listener).build(); // 봇 생성
+			//bot = new JDABuilder(token).addEventListener(listener).build(); // 봇 생성
+			bot = JDABuilder.createDefault(token).addEventListeners(listener).build(); // 봇 생성
 			connection = true;
 		} catch (LoginException e) {
 			ps.println("login failed");
@@ -78,7 +80,7 @@ public class DiscordBot {
 		public void startSendingAudio(byte[] buffer, String channelName, JDA bot) {
 			
 			// 전송할 음성 채널 설정
-			VoiceChannel channel = bot.getVoiceChannelByName(channelName, true).get(0);
+			VoiceChannel channel = bot.getVoiceChannelsByName(channelName, true).get(0);
 			AudioManager manager = channel.getGuild().getAudioManager();
 			
 			// 오디오 전송 시작
@@ -112,7 +114,7 @@ public class DiscordBot {
 
 		// 전송할 오디오 반환
 		@Override
-		public byte[] provide20MsAudio() {
+		public ByteBuffer provide20MsAudio() {
 			
 			// 버퍼에서 데이터 읽어오기
 			for(int i = 0; i < audio.length; i++) {
@@ -128,7 +130,7 @@ public class DiscordBot {
 				audio[i + 1] = t;
 			}
 			
-			return audio;
+			return ByteBuffer.wrap(audio);
 			
 		}
 		
